@@ -1,1 +1,25 @@
-import { NextResponse } from "next/server"; import { supabase } from "@/lib/supabase"; export const runtime = "nodejs"; export async function POST() { const { data, error } = await supabase.from("chat_sessions").insert([{ source: "trainer-ui" }]).select().single(); if (error) { return NextResponse.json({ error: error.message }, { status: 500 }); } return NextResponse.json({ session_id: data.id }, { status: 200 }); }
+import { NextResponse } from "next/server";
+import { supabase } from "@/lib/supabase";
+
+export const runtime = "nodejs";
+
+export async function POST() {
+  const supabaseClient = supabase();
+  const { data, error } = await supabaseClient
+    .from("chat_sessions")
+    .insert([{ source: "trainer-ui" }])
+    .select()
+    .single();
+
+  if (error) {
+    return NextResponse.json(
+      { error: error.message },
+      { status: 500 }
+    );
+  }
+
+  return NextResponse.json(
+    { session_id: data.id },
+    { status: 200 }
+  );
+}

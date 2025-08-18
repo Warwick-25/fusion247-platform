@@ -30,8 +30,10 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    const supabaseAdminClient = supabaseAdmin();
+
     // 1) Ensure a chat_sessions row exists (id is UUID)
-    const { error: upsertSessionErr } = await supabaseAdmin
+    const { error: upsertSessionErr } = await supabaseAdminClient
       .from('chat_sessions')
       .upsert([{ id: session_id }], { onConflict: 'id' });
 
@@ -43,7 +45,7 @@ export async function POST(req: NextRequest) {
     const assistantText = `You said: "${prompt}" — we heard you!`;
 
     // 2) Insert user message
-    const { error: userMsgErr } = await supabaseAdmin.from('chat_messages').insert([
+    const { error: userMsgErr } = await supabaseAdminClient.from('chat_messages').insert([
       {
         session_id, // FK -> chat_sessions.id
         role: 'user',
@@ -54,7 +56,7 @@ export async function POST(req: NextRequest) {
     if (userMsgErr) throw new Error(userMsgErr.message);
 
     // 3) Insert assistant message
-    const { error: botMsgErr } = await supabaseAdmin.from('chat_messages').insert([
+    const { error: botMsgErr } = await supabaseAdminClient.from('chat_messages').insert([
       {
         session_id,
         role: 'assistant',
